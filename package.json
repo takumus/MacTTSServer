@@ -6,10 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "takumus",
   "license": "ISC",
   "dependencies": {
-    "nedb": "^1.8.0",
     "puid": "^1.0.7",
     "url": "^0.11.0"
   }
