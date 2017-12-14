@@ -6,5 +6,6 @@ module.exports = {
     defaultText: "sample",
     defaultPitch: "0",
     soxPath: "./libs/sox-14.4.2/sox",
+    ffmpegPath: "./libs/ffmpeg",
     encodeType: "ogg"
 }

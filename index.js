@@ -17,7 +17,7 @@ function generate(voice, rate, text, out) {
         });
     });
 }
-function encode(from, to, pitch) {
+function changePitch(from, to, pitch) {
     return new Promise((resolve, reject) => {
         const process = spawn(config.soxPath, [from, to, "pitch", pitch]);
         process.on('close', (code) => {
@@ -29,15 +29,31 @@ function encode(from, to, pitch) {
         });
     })
 }
+function encode(from, to) {
+    return new Promise((resolve, reject) => {
+        const process = spawn(config.ffmpegPath, ["-i", from, to, "-y"]);
+        process.on('close', (code) => {
+            if (code == 0) {
+                resolve(code);
+            }else {
+                reject(code);
+            }
+        });
+    })
+}
 async function request(voice, rate, pitch, text){
     const id = puid.generate();
-    const tmpOut = `${config.tmpDir}${id}.aiff`;
-    const out = `${config.tmpDir}${id}.${config.encodeType}`;
     // sayコマンドで生成
-    await generate(voice, rate, text, tmpOut);
-    if (!fs.existsSync(tmpOut)) throw new Error();
-    // soxで変換
-    await encode(tmpOut, out, pitch);
+    const aiff = `${config.tmpDir}${id}.aiff`;
+    await generate(voice, rate, text, aiff);
+    if (!fs.existsSync(aiff)) throw new Error();
+    // soxでピッチ変換
+    const ogg = `${config.tmpDir}${id}.ogg`;
+    await changePitch(aiff, ogg, pitch);
+    if (!fs.existsSync(ogg)) throw new Error();
+    // ffmpegでエンコード
+    const out = `${config.tmpDir}${id}.${config.encodeType}`;
+    await encode(ogg, out);
     if (!fs.existsSync(out)) throw new Error();
     return out;
 }
