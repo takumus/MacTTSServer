@@ -4,13 +4,7 @@ const http = require("http");
 const url = require("url")
 const Puid = require("puid");
 const puid = new Puid();
-const config = {
-    tmpDir: "./tmp/",
-    serverPort: 8080,
-    defaultVoice: "otoya",
-    defaultRate: "200",
-    defaultText: "sample"
-}
+const config = require("./config");
 function generate(voice, rate, text, out) {
     return new Promise((resolve, reject) => {
         const process = spawn("say", ["-v", voice, "-o", out, `[[rate ${rate}]]${text}`]);
@@ -21,12 +15,29 @@ function generate(voice, rate, text, out) {
                 reject(code);
             }
         });
+    });
+}
+function encode(from, to, pitch) {
+    return new Promise((resolve, reject) => {
+        const process = spawn(config.soxPath, [from, to, "pitch", pitch]);
+        process.on('close', (code) => {
+            if (code == 0) {
+                resolve(code);
+            }else {
+                reject(code);
+            }
+        });
     })
 }
-async function request(voice, rate, text){
+async function request(voice, rate, pitch, text){
     const id = puid.generate();
-    const out = `${config.tmpDir}${id}.aiff`;
-    await generate(voice, rate, text, out);
+    const tmpOut = `${config.tmpDir}${id}.aiff`;
+    const out = `${config.tmpDir}${id}.${config.encodeType}`;
+    // sayコマンドで生成
+    await generate(voice, rate, text, tmpOut);
+    if (!fs.existsSync(tmpOut)) throw new Error();
+    // soxで変換
+    await encode(tmpOut, out, pitch);
     if (!fs.existsSync(out)) throw new Error();
     return out;
 }
@@ -35,9 +46,10 @@ http.createServer().on("request", (req, res) => {
     request(
         query.voice || config.defaultVoice,
         query.rate || config.defaultRate,
+        query.pitch || config.defaultPitch,
         decodeURI(query.text || config.defaultText)
     ).then((out) => {
-        res.writeHead(200, {'content-Type': 'audio/aiff'});
+        res.writeHead(200, {'content-Type': `audio/${config.encodeType}`});
         res.write(fs.readFileSync(out, 'binary'), "binary");
         res.end(null, "binary");
     }).catch((e) => {
