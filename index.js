@@ -29,7 +29,7 @@ function changePitch(from, to, pitch) {
         });
     })
 }
-function encode(from, to) {
+function encodeTo(from, to) {
     return new Promise((resolve, reject) => {
         const process = spawn(config.ffmpegPath, ["-i", from, to, "-y"]);
         process.on('close', (code) => {
@@ -41,7 +41,7 @@ function encode(from, to) {
         });
     })
 }
-async function request(voice, rate, pitch, text){
+async function request(voice, rate, pitch, encode, text){
     const id = puid.generate();
     // sayコマンドで生成
     const aiff = `${config.tmpDir}${id}.aiff`;
@@ -52,20 +52,23 @@ async function request(voice, rate, pitch, text){
     await changePitch(aiff, ogg, pitch);
     if (!fs.existsSync(ogg)) throw new Error();
     // ffmpegでエンコード
-    const out = `${config.tmpDir}${id}.${config.encodeType}`;
-    await encode(ogg, out);
+    const out = `${config.tmpDir}${id}.${encode}`;
+    await encodeTo(ogg, out);
     if (!fs.existsSync(out)) throw new Error();
     return out;
 }
 http.createServer().on("request", (req, res) => {
     const query = url.parse(req.url, true).query;
+    console.log(query);
+    const encode = query.encode || config.defaultEncode;
     request(
         query.voice || config.defaultVoice,
         query.rate || config.defaultRate,
         query.pitch || config.defaultPitch,
+        encode,
         decodeURI(query.text || config.defaultText)
     ).then((out) => {
-        res.writeHead(200, {'content-Type': `audio/${config.encodeType}`});
+        res.writeHead(200, {'content-Type': `audio/${encode}`});
         res.write(fs.readFileSync(out, 'binary'), "binary");
         res.end(null, "binary");
     }).catch((e) => {

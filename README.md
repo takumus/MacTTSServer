@@ -21,9 +21,9 @@ module.exports = {
     defaultRate: "200", // デフォルトの速さ
     defaultText: "sample", // デフォルトのテキスト
     defaultPitch: "0", // デフォルトのピッチ
+    defaultEncode: "ogg", // 出力のエンコーディング(ffmpegが対応するものであれば)
     soxPath: "./libs/sox-14.4.2/sox", // soxへのパス
     ffmpegPath: "./libs/ffmpeg", // ffmpegへのパス
-    encodeType: "ogg" // 出力のエンコーディング(ffmpegが対応するものであれば)
 }
 ```
 ## 起動
