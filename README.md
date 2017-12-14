@@ -8,7 +8,7 @@ sayコマンドが吐いた`aiff`を`ogg`へエンコードするのに、
 `sox`を使っています。  
 `sox`へのパスを`config.js`へ指定しないと動きません。  
 `global`に`sox`があれば、`soxPath`は`sox`で良いです。  
-<https://sourceforge.net/projects/sox/>
+<https://sourceforge.net/projects/sox/>  
 今回は↑の`sox-14.4.2`を使っています。
 
 ## 起動
