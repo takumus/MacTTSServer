@@ -36,8 +36,8 @@ http://localhost:8080/?voice=otoya&rate=300&pitch=200&text=こんにちは
 - *voice* : 声の種類です。`Otoya`と`Kyoko`には対応しています。
 - *rate* : 声の速さです。
 - *pitch* : 声の高さです。
+- *encode* : 音声ファイルの形式です。
 - *text* : 読ませる文字です。
-これでaiffが帰って来ます。
 ## 今後の予定
 - ~~ピッチ変更。~~
 - ~~好きな音声フォーマットで。~~
