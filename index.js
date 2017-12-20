@@ -47,7 +47,7 @@ function createOption(query) {
     option.voice = query.voice || config.defaultVoice;
     option.rate = query.rate || config.defaultRate;
     option.pitch = query.pitch || config.defaultPitch;
-    option.encoding = query.encoding || config.defaultEncoding;
+    option.encoding = (query.encoding || config.defaultEncoding).toLowerCase();
     try {
         option.text = decodeURI(query.text || config.defaultText);
     }catch (e) {
@@ -75,11 +75,15 @@ async function request(option){
     return out;
 }
 function validate(option) {
-    if (isNaN(Number(option.rate))) return false;
-    if (config.minRate < option.rate || option.rate <= config.maxRate) return false;
-    if (isNaN(Number(option.pitch))) return false;
-    if (option.text.length > 100) return false;
-    return true;
+    return new Promise((resolve, reject) => {
+        if (isNaN(Number(option.rate))) reject("'rate' is not a number");
+        if (config.minRate > option.rate || option.rate > config.maxRate) reject(`'rate' is out of range [${config.minRate} < rate < ${config.maxRate}]`);
+        if (isNaN(Number(option.pitch))) reject("'pitch' is not a number");
+        if (option.text.length > config.maxTextLength) reject(`'text' is longer than ${config.maxTextLength}`);
+        console.log(config.encodings, option.encoding);
+        if (config.encodings.indexOf(option.encoding) < 0) reject(`encoding '${option.encoding}' is not found in supported encoding list [${config.encodings}]`);
+        resolve();
+    });
 }
 function processCount(v) {
     currentProcess += v;
@@ -94,20 +98,20 @@ http.createServer().on("request", (req, res) => {
     }
     const option = createOption(url.parse(req.url, true).query);
     console.log(new Date().toString(), JSON.stringify(option));
-    if (!validate(option)) {
+    validate(option).then(() => {
+        processCount(1);
+        request(option).then((out) => {
+            processCount(-1);
+            res.writeHead(200, {'content-Type': `audio/${option.encoding}`});
+            res.write(fs.readFileSync(out, 'binary'), "binary");
+            res.end(null, "binary");
+        }).catch((e) => {
+            processCount(-1);
+            res.writeHead(500, {'content-Type': 'text/plain'});
+            res.end("internal error");
+        });
+    }).catch((error) => {
         res.writeHead(400, {'content-Type': 'text/plain'});
-        res.end("invalid query");
-        return;
-    }
-    processCount(1);
-    request(option).then((out) => {
-        processCount(-1);
-        res.writeHead(200, {'content-Type': `audio/${option.encoding}`});
-        res.write(fs.readFileSync(out, 'binary'), "binary");
-        res.end(null, "binary");
-    }).catch((e) => {
-        processCount(-1);
-        res.writeHead(500, {'content-Type': 'text/plain'});
-        res.end("internal error");
+        res.end(`invalid query : ${error}`);
     });
 }).listen(config.serverPort);
