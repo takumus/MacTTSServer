@@ -8,5 +8,7 @@ module.exports = {
     defaultEncoding: "ogg",
     soxPath: "./libs/sox-14.4.2/sox",
     ffmpegPath: "./libs/ffmpeg",
-    maxProcess: 50
+    maxProcess: 50,
+    minRate: 100,
+    maxRate: 800
 }

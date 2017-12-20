@@ -76,6 +76,7 @@ async function request(option){
 }
 function validate(option) {
     if (isNaN(Number(option.rate))) return false;
+    if (config.minRate < option.rate || option.rate <= config.maxRate) return false;
     if (isNaN(Number(option.pitch))) return false;
     if (option.text.length > 100) return false;
     return true;
