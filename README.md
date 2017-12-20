@@ -15,15 +15,20 @@ sayコマンドが吐いた`aiff`のピッチを変更するのに`sox`を使っ
 ## config.js
 ```js
 module.exports = {
-    tmpDir: "./tmp/",// 生成した一時ファイル
-    serverPort: 8080,// ポート
+    tmpDir: "./tmp/", // 生成した一時ファイル
+    serverPort: 8080, // ポート
     defaultVoice: "otoya", // デフォルトの声
     defaultRate: "200", // デフォルトの速さ
     defaultText: "sample", // デフォルトのテキスト
     defaultPitch: "0", // デフォルトのピッチ
     defaultEncode: "ogg", // 出力のエンコーディング(ffmpegが対応するものであれば)
+    encodings: ["ogg", "mp3", "m4a", "aiff"], // 対応するencoding形式。それ以外のものが来たらエラーを吐きます。
     soxPath: "./libs/sox-14.4.2/sox", // soxへのパス
     ffmpegPath: "./libs/ffmpeg", // ffmpegへのパス
+    maxProcess: 50, // 最大プロセス数(dosなどを食らった場合のために上限をセットします。)
+    minRate: 100, // 最低レート(遅すぎると生成に長時間かかるので)
+    maxRate: 800, // 最大レート
+    maxTextLength: 200 // 最大の文字の長さ
 }
 ```
 ## 起動
@@ -36,7 +41,7 @@ http://localhost:8080/?voice=otoya&rate=300&pitch=200&text=こんにちは
 - *voice* : 声の種類です。`Otoya`と`Kyoko`には対応しています。
 - *rate* : 声の速さです。
 - *pitch* : 声の高さです。
-- *encode* : 音声ファイルの形式です。
+- *encoding* : 音声ファイルの形式です。
 - *text* : 読ませる文字です。
 ## 今後の予定
 - ~~ピッチ変更。~~

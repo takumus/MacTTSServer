@@ -12,5 +12,5 @@ module.exports = {
     maxProcess: 50,
     minRate: 100,
     maxRate: 800,
-    maxTextLength: 200,
+    maxTextLength: 200
 }

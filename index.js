@@ -80,7 +80,6 @@ function validate(option) {
         if (config.minRate > option.rate || option.rate > config.maxRate) reject(`'rate' is out of range [${config.minRate} < rate < ${config.maxRate}]`);
         if (isNaN(Number(option.pitch))) reject("'pitch' is not a number");
         if (option.text.length > config.maxTextLength) reject(`'text' is longer than ${config.maxTextLength}`);
-        console.log(config.encodings, option.encoding);
         if (config.encodings.indexOf(option.encoding) < 0) reject(`encoding '${option.encoding}' is not found in supported encoding list [${config.encodings}]`);
         resolve();
     });
